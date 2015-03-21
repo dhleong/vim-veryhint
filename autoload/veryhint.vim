@@ -1,6 +1,7 @@
 " Author: Daniel Leong
 "
 
+" SETUP {{{
 if !has('python') && !has('python3')
     echo 'veryhint requires python support'
     finish
@@ -8,32 +9,27 @@ endif
 
 let s:cwdir = expand("<sfile>:p:h")
 let s:script = s:cwdir . '/veryhint.py'
-py "import vim"
 if has('python')
-  execute 'pyfile ' . fnameescape(s:script)
+    execute 'pyfile ' . fnameescape(s:script)
 elseif has('python3')
-  execute 'py3file ' . fnameescape(s:script)
+    execute 'py3file ' . fnameescape(s:script)
 endif
 
-function! veryhint#Init()
-    " NB: per docs, during BufWipeout, the "current buffer"
-    "  may be different, so let's ensure we pass the right buffer number
-    let bufNo = bufnr('%')
-    augroup veryhint
-        autocmd!
-        autocmd InsertLeave <buffer> call veryhint#HideHints()
-        " TODO how is jedi able to handle ctrl-c to hide hints?
-        exe 'autocmd BufWipeout <buffer> py VeryHint.cleanup(' . bufNo . ')'
-    augroup END
+python << PYEOF
+import vim
+PYEOF
 
-    " TODO this is where we load syntax
-endfunction
+" }}} 
 
-function! veryhint#ShowHints(hints)
+function! veryhint#ShowHints(hints) " {{{
     if !exists("b:_veryhint_init")
-        call veryhint#Init()
+        call s:Init()
         let b:_veryhint_init = 1
     endif
+
+    let b:_veryhint_shown = a:hints
+    let b:_veryhint_line = line('.')
+    let b:_veryhint_col = col('.')
 
 python << PYEOF
 hints = vim.bindeval("a:hints")
@@ -42,15 +38,52 @@ VeryHint.forBuffer(vim.current.buffer).showHints(hints, cursor)
 PYEOF
 
     return ''
-endfunction
+endfunction " }}}
 
-function! veryhint#HideHints()
+function! veryhint#HideHints() " {{{
     py VeryHint.forBuffer(vim.current.buffer).hideHints()
 
-    " TODO remove the hint-creating history somehow?
+    if exists('b:_veryhint_shown')
+        unlet b:_veryhint_shown
+        unlet b:_veryhint_line
+        unlet b:_veryhint_col
+    endif
 
     return ''
-endfunction
+endfunction " }}}
 
+"
+" Private utils
+"
+
+function! s:Init() " {{{
+    " NB: per docs, during BufWipeout, the "current buffer"
+    "  may be different, so let's ensure we pass the right buffer number
+    let bufNo = bufnr('%')
+    augroup veryhint
+        autocmd!
+        autocmd InsertLeave <buffer> call veryhint#HideHints()
+        autocmd CursorMoved <buffer> call veryhint#HideHints()
+        autocmd CursorMovedI <buffer> call <SID>AdjustHints()
+        exe 'autocmd BufWipeout <buffer> py VeryHint.cleanup(' . bufNo . ')'
+    augroup END
+
+    " TODO this is where we load syntax
+endfunction " }}}
+
+function! s:AdjustHints() " {{{
+    let line = line('.')
+    let col = col('.')
+
+    if !exists('b:_veryhint_line')
+        return
+    endif
+
+    if line != b:_veryhint_line || col < b:_veryhint_col
+        call veryhint#duck#Duck()
+    else
+        call veryhint#duck#Unduck()
+    endif
+endfunction " }}}
 
 " vim:ft=vim:fdm=marker

@@ -1,4 +1,3 @@
-
 class VeryHint(object):
 
     """Manages hints in a buffer"""

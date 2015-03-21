@@ -11,5 +11,4 @@ to provide [jedi](https://github.com/davidhalter/jedi-vim)-style inline paramete
 
 ### TODO
 
-- Don't pollute the undo history
 - Style, style, style
