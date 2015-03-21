@@ -2,7 +2,7 @@ class VeryHint(object):
 
     """Manages hints in a buffer"""
 
-    FORMAT = "%s" # TODO syntax stuff
+    FORMAT = "{<VeryHint{<%s>}>}"
 
     INSTANCES = {}
 

@@ -68,7 +68,24 @@ function! s:Init() " {{{
         exe 'autocmd BufWipeout <buffer> py VeryHint.cleanup(' . bufNo . ')'
     augroup END
 
-    " TODO this is where we load syntax
+    " style, style, style
+    setlocal conceallevel=3
+    syntax region CursorLine matchgroup=vhintLine
+            \ start=/{<VeryHint{</
+            \ end=/>}>}/
+            \ concealends oneline
+            \ contains=vhintSelected
+    syntax match vhintSelectedSymbol "*" contained conceal
+    syntax match vhintSelected "\*[^*]\+\*" contained contains=vhintSelectedSymbol
+
+    if exists('g:colors_name')
+        highlight def link vhintLine CursorLine
+        highlight def link vhintSelected TabLine
+    else
+        highlight vhintLine term=NONE cterm=NONE ctermfg=6 guifg=Black gui=NONE ctermbg=0 guibg=Grey
+        highlight vhintSelected term=bold,underline cterm=bold,underline gui=bold,underline ctermbg=0 guibg=#555555
+    end
+ 
 endfunction " }}}
 
 function! s:AdjustHints() " {{{
