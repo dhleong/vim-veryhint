@@ -37,6 +37,10 @@ class VeryHint(object):
 
         self._saved = None
 
+        # remove any ducks
+        self._duckHints = None
+        self._duckCursor = None
+
     def showHints(self, hints, atCursor):
         """Show the hints
 
