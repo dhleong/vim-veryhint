@@ -22,6 +22,16 @@ PYEOF
 " }}} 
 
 function! veryhint#ShowHints(hints, ...) " {{{
+    " Show hints
+    " Arguments:
+    "  - "hints" An array of strings. The 'selected'
+    "            param in a hint may be surrounded by asterisks
+    "  - "col" (optional) The 0-indexed column on which to show
+    "            the hints; defaults to cursor's column
+    "  - "line" (optional) The 1-indexed line on which to show
+    "            the hints; defaults to the cursor's line. This
+    "            is passed AFTER col because displaying on the
+    "            current line is a much more common case
     if !exists("b:_veryhint_init")
         call s:Init()
         let b:_veryhint_init = 1
@@ -31,11 +41,12 @@ function! veryhint#ShowHints(hints, ...) " {{{
     let b:_veryhint_line = line('.')
     let b:_veryhint_col = col('.')
 
-    " TODO use optional, provided location
+    let col = a:0 ? a:1 : b:_veryhint_col
+    let line = a:0 > 1 ? a:2 : b:_veryhint_line
 
 python << PYEOF
 hints = vim.bindeval("a:hints")
-cursor = vim.current.window.cursor
+cursor = (vim.bindeval("line"), vim.bindeval("col"))
 VeryHint.forBuffer(vim.current.buffer).showHints(hints, cursor)
 PYEOF
 
