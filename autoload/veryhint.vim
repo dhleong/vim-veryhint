@@ -21,7 +21,7 @@ PYEOF
 
 " }}} 
 
-function! veryhint#ShowHints(hints) " {{{
+function! veryhint#ShowHints(hints, ...) " {{{
     if !exists("b:_veryhint_init")
         call s:Init()
         let b:_veryhint_init = 1
@@ -30,6 +30,8 @@ function! veryhint#ShowHints(hints) " {{{
     let b:_veryhint_shown = a:hints
     let b:_veryhint_line = line('.')
     let b:_veryhint_col = col('.')
+
+    " TODO use optional, provided location
 
 python << PYEOF
 hints = vim.bindeval("a:hints")

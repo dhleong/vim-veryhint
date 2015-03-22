@@ -1,3 +1,5 @@
+import re
+
 class VeryHint(object):
 
     """Manages hints in a buffer"""
@@ -5,6 +7,8 @@ class VeryHint(object):
     FORMAT = "{<VeryHint{<%s>}>}"
 
     INSTANCES = {}
+
+    _RE_STRIP = re.compile(r'["\'(]')
 
     def __init__(self, buf):
         """Initialize VeryHint for a buffer
@@ -22,10 +26,7 @@ class VeryHint(object):
         self._duckCursor = None
 
     def hideHints(self):
-        """Hide any hints being shown
-        :returns: TODO
-
-        """
+        """Hide any hints being shown"""
         self._hints = None
 
         if self._saved:
@@ -39,9 +40,8 @@ class VeryHint(object):
     def showHints(self, hints, atCursor):
         """Show the hints
 
-        :hints: TODO
-        :atCursor: TODO
-        :returns: TODO
+        :hints: Array of strings
+        :atCursor: Tuple of (line, col)
 
         """
 
@@ -99,7 +99,7 @@ class VeryHint(object):
                 hintStart -= 1
 
             renderedHint = VeryHint.FORMAT % (hint)
-            renderedLine = line[:hintStart] + renderedHint + line[hintEnd:]
+            renderedLine = self._strip(line[:hintStart]) + renderedHint + line[hintEnd:]
             self._buf[lineNo] = renderedLine
 
             i += 1
@@ -117,13 +117,22 @@ class VeryHint(object):
             self.showHints(self._duckHints, self._duckCursor)
             self._duckHints = None
             self._duckCursor = None
+
+    def _strip(self, text):
+        """Clean syntax-breaking characters from text
+
+        :text: The text from which to strip
+        :returns: A new string with the characters "cleaned"
+
+        """
+        return VeryHint._RE_STRIP.sub(" ", text)
         
     @classmethod
     def forBuffer(cls, buf):
         """Get the VeryHint instance for the buffer
 
-        :buf: TODO
-        :returns: TODO
+        :buf: Vim buffer object
+        :returns: A VeryHint instance
 
         """
         # NB: We can't directly store this instance
