@@ -101,9 +101,17 @@ class VeryHint(object):
                 # (this is just in case; otherwise should be impossible)
                 hint = ' %s' % hint
                 hintStart -= 1
+            
+            beforeHint = self._strip(line[:hintStart]) 
+            afterHint = line[hintEnd:]
+
+            extraSpace = hintStart - len(line)
+            if extraSpace > 0:
+                # pad the line with spaces so it lines up
+                beforeHint += ' ' * extraSpace
 
             renderedHint = VeryHint.FORMAT % (hint)
-            renderedLine = self._strip(line[:hintStart]) + renderedHint + line[hintEnd:]
+            renderedLine = beforeHint + renderedHint + afterHint
             self._buf[lineNo] = renderedLine
 
             i += 1
@@ -119,8 +127,7 @@ class VeryHint(object):
         """Restore temporarily hidden hints (if any)"""
         if self._duckHints and self._duckCursor:
             self.showHints(self._duckHints, self._duckCursor)
-            self._duckHints = None
-            self._duckCursor = None
+            # showHints clears the ducks
 
     def _strip(self, text):
         """Clean syntax-breaking characters from text

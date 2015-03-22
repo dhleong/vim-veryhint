@@ -166,5 +166,15 @@ class VeryHintTests(unittest.TestCase):
         VeryHint.forBuffer(buf).hideHints()
         self.assertEquals(buf[0], "bars")
 
+    def test_pad(self):
+        buf = DummyBuffer([
+            'i++',
+            'getCrew(|'
+        ])
+
+        # space should be added after the i++ so it aligns
+        VeryHint.forBuffer(buf).showHints(["int index"], buf.cursor)
+        self.assertEquals(buf[0], "i++    { int index }")
+
 if __name__ == '__main__':
     unittest.main()
