@@ -37,10 +37,6 @@ class VeryHint(object):
 
         self._saved = None
 
-        # remove any ducks
-        self._duckHints = None
-        self._duckCursor = None
-
     def showHints(self, hints, atCursor):
         """Show the hints
 
@@ -59,6 +55,10 @@ class VeryHint(object):
         self.hideHints()
         self._hints = hints
         self._atCursor = atCursor
+
+        # remove any ducks
+        self._duckHints = None
+        self._duckCursor = None
 
         if hints is None or not len(hints):
             # nothing to do!
